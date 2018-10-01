@@ -36,8 +36,8 @@ class Environment:
     MODES = [MODE_BUY, MODE_SELL, MODE_NONE]
 
     def __init__(self, start_money, seq_size):
-        connection = pymysql.connect(host='비밀', user='비밀', password='비밀',
-                                     db='bitcoin', charset='utf8')
+        connection = pymysql.connect(host='', user='', password='',
+                                     db='', charset='utf8')
 
         # 데이터를 불러오고 없는 데이터는 바로 이전의 데이터로 채워넣는다.
         data = []

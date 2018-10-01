@@ -44,10 +44,13 @@ class DQN:
 
             rnn_output = tf.reshape(rnn_output, [-1, self.seq_length * self.data_dim])
 
-            output = tf.contrib.layers.fully_connected(self._MONEY, 1, activation_fn=tf.nn.relu)
+            money = tf.contrib.layers.fully_connected(self._MONEY, 128, activation_fn=tf.nn.relu)
+            money = tf.nn.dropout(money, keep_prob=self._keep_prob)
+
+            output = tf.contrib.layers.fully_connected(rnn_output, 128, activation_fn=tf.nn.relu)
             output = tf.nn.dropout(output, keep_prob=self._keep_prob)
 
-            output = tf.contrib.layers.fully_connected(output + rnn_output, 128, activation_fn=tf.nn.relu)
+            output = tf.contrib.layers.fully_connected(output + money, 64, activation_fn=tf.nn.relu)
             output = tf.nn.dropout(output, keep_prob=self._keep_prob)
 
         self._Qpred = tf.contrib.layers.fully_connected(output, self.output_size,

@@ -87,9 +87,10 @@ def main():
 
         episode = last_episode
         max_episodes = 30000
+        frame = 0
 
         while episode < max_episodes:
-            e = 1. / ((episode / 20) + 1)
+            e = 1. / ((frame / 1000) + 1)
 
             die = False
             clear = False
@@ -132,6 +133,7 @@ def main():
                             print("save file not found")
 
                 state = next_state
+                frame += 1
 
 
             print("================  GAME OVER  ===================")
