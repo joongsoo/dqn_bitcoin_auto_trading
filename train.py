@@ -7,6 +7,8 @@ import dqn
 from collections import deque
 from env.train import Environment
 from data_convert import encode_money, encode_coin_cnt
+from multiprocessing import Pool
+from functools import partial
 
 
 
@@ -31,10 +33,15 @@ replay_buffer = deque()
 MAX_BUFFER_SIZE = 1000000
 TARGET_UPDATE_FREQUENCY = 10
 
+def get_from_idx(idx, target_list):
+    return np.vstack([item[idx] for item in target_list])
+
 def is_learn_start():
     return len(replay_buffer) > min_learn_size
 
 def replay_train(mainDQN, targetDQN, train_batch):
+    #with Pool(4) as pool:
+    #    aa = pool.map(partial(get_from_idx, target_list=li), range(4))
     states = np.vstack([[x[0]] for x in train_batch])
     moneys = np.array([x[1] for x in train_batch])
     next_moneys = np.array([x[2] for x in train_batch])
