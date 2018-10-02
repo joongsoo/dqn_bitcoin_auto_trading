@@ -1,0 +1,80 @@
+  File "train.py", line 161
+    if is_learn_start():
+    ^
+IndentationError: unexpected indent
+2018-10-02 14:12:00.261659: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2018-10-02 14:12:00.392803: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:964] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2018-10-02 14:12:00.393320: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1411] Found device 0 with properties: 
+name: Tesla P40 major: 6 minor: 1 memoryClockRate(GHz): 1.531
+pciBusID: 0000:00:05.0
+totalMemory: 23.87GiB freeMemory: 23.71GiB
+2018-10-02 14:12:00.393364: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1490] Adding visible gpu devices: 0
+2018-10-02 14:12:00.700739: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] Device interconnect StreamExecutor with strength 1 edge matrix:
+2018-10-02 14:12:00.700794: I tensorflow/core/common_runtime/gpu/gpu_device.cc:977]      0 
+2018-10-02 14:12:00.700802: I tensorflow/core/common_runtime/gpu/gpu_device.cc:990] 0:   N 
+2018-10-02 14:12:00.701253: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1103] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 22998 MB memory) -> physical GPU (device: 0, name: Tesla P40, pci bus id: 0000:00:05.0, compute capability: 6.1)
+save file not found
+================  GAME OVER  ===================
+episode(step) : 0(22113)
+최종 잔액 :  1452.8230428274303
+================================================
+================  GAME OVER  ===================
+episode(step) : 0(21158)
+최종 잔액 :  1141.310785840445
+================================================
+================  GAME OVER  ===================
+episode(step) : 0(21158)
+최종 잔액 :  1120.2583106319607
+================================================
+================  GAME OVER  ===================
+episode(step) : 0(21405)
+최종 잔액 :  1430.6854076426803
+================================================
+================  GAME OVER  ===================
+episode(step) : 0(21398)
+최종 잔액 :  1391.819204762077
+================================================
+================  GAME OVER  ===================
+episode(step) : 0(21387)
+최종 잔액 :  1385.2472538083825
+================================================
+================  GAME OVER  ===================
+episode(step) : 0(22445)
+최종 잔액 :  1920.8609930742518
+================================================
+loss : 22359756429.809875
+loss : 22083300854.452026
+loss : 22494082803.448997
+loss : 22312655224.020306
+loss : 22309030025.23483
+loss : 22286990180.35413
+loss : 22487852430.495075
+loss : 22330404924.108112
+loss : 22337106638.638103
+loss : 22293985060.515125
+loss : 22330424743.961975
+loss : 22292374049.371735
+loss : 22060884477.766926
+loss : 22181566371.814056
+loss : 22297878715.73397
+loss : 22378950174.987675
+loss : 22362778123.498154
+loss : 22389088047.913414
+loss : 22330213079.056084
+loss : 22348370618.570545
+loss : 22332935350.939625
+loss : 22186813692.3986
+loss : 22400041662.287945
+loss : 22223470204.657463
+loss : 22365994995.561764
+loss : 22319991600.937023
+loss : 22184680971.75444
+loss : 22169228034.709007
+loss : 22376521053.882305
+loss : 22355598895.08776
+loss : 22256916504.62298
+loss : 22315837153.18635
+loss : 22521356241.025654
+loss : 22450441471.38894
+loss : 22345883275.227608
+loss : 22186289409.51504

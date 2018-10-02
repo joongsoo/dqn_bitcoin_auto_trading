@@ -15,20 +15,20 @@ hidden_size = 3
 
 # 총 입력길이
 data_dim = 6
-sequence_length = 1440
+sequence_length = 144
 input_size = data_dim * sequence_length
 output_size = 3
 
 
 # nn param
-learning_rate = 1e-5
-batch_size = 10000
+learning_rate = 1e-4
+batch_size = 100000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
 
 replay_buffer = deque()
-MAX_BUFFER_SIZE = 100000
+MAX_BUFFER_SIZE = 1000000
 TARGET_UPDATE_FREQUENCY = 10
 
 def is_learn_start():
@@ -65,7 +65,7 @@ def get_copy_var_ops(dest_scope_name="target", src_scope_name="main"):
 
 def main():
     # init env
-    start_money = 100000
+    start_money = 1000000
     env = Environment(start_money, sequence_length)
 
     # run
@@ -90,7 +90,7 @@ def main():
         frame = 0
 
         while episode < max_episodes:
-            e = 1. / ((frame / 1000) + 1)
+            e = 1. / ((episode / 20) + 1)
 
             die = False
             clear = False
@@ -118,7 +118,7 @@ def main():
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
-
+                """
                 if is_learn_start():
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
@@ -133,15 +133,18 @@ def main():
                             print("save file not found")
 
                 state = next_state
-                frame += 1
-
+                if is_learn_start():
+                    frame += 1
+                """
+                state = next_state
 
             print("================  GAME OVER  ===================")
             print("episode(step) : {}({})".format(episode, current_step))
             print("최종 잔액 : ", now_money)
             print("================================================")
 
-            """ one episode one traning
+            # one episode one traning
+            """
             for _ in range(int(MAX_BUFFER_SIZE / batch_size)):
                 minibatch = random.sample(replay_buffer, batch_size)
                 loss, _ = replay_train(mainDQN, targetDQN, minibatch)
@@ -154,8 +157,20 @@ def main():
                 targetDQN.save(episode)
             except:
                 print("save file not found")
-            """
+            """            
             if is_learn_start():
+                for _ in range(100):
+                    minibatch = random.sample(replay_buffer, batch_size)
+                    loss, _ = replay_train(mainDQN, targetDQN, minibatch)
+                    print("loss : {}".format(loss))
+
+                sess.run(copy_ops)
+
+                try:
+                    mainDQN.save(episode)
+                    targetDQN.save(episode)
+                except:
+                    print("save file not found")
                 episode += 1
 
 

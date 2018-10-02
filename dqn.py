@@ -83,3 +83,4 @@ class DQN:
             self._Y: y_stack,
             self._keep_prob: 0.7
         })
+
