@@ -37,13 +37,14 @@ def is_learn_start():
 def replay_train(mainDQN, targetDQN, train_batch):
     states = np.vstack([[x[0]] for x in train_batch])
     moneys = np.array([x[1] for x in train_batch])
-    actions = np.array([x[2] for x in train_batch])
-    rewards = np.array([x[3] for x in train_batch])
-    next_states = np.vstack([[x[4]] for x in train_batch])
+    next_moneys = np.array([x[2] for x in train_batch])
+    actions = np.array([x[3] for x in train_batch])
+    rewards = np.array([x[4] for x in train_batch])
+    next_states = np.vstack([[x[5]] for x in train_batch])
 
     X = states
 
-    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, moneys), axis=1)
+    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
 
     y = mainDQN.predict(states, moneys)
     y[np.arange(len(X)), actions] = Q_target
@@ -107,14 +108,17 @@ def main():
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, before_money, before_coin_cnt, now_money, next_state, reward, die, clear = env.step(action)
+                current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear = env.step(action)
                 before_money = encode_money(before_money)
                 before_coin_cnt = encode_coin_cnt(before_coin_cnt)
+                next_money = encode_money(next_money)
+                next_coin_cnt = encode_coin_cnt(next_coin_cnt)
+
 
                 if die:
                     reward = -10000
 
-                replay_buffer.append((state, [before_money, before_coin_cnt], action, reward, next_state))
+                replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()

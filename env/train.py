@@ -121,5 +121,8 @@ class Environment:
         if self.current_step + self.seq_size >= len(self.data):
             clear = True
 
-        return self.current_step, before_money, before_coin_cnt, now_money, next_state, reward, die, clear
+        next_money = self.money
+        next_coin_cnt = self.coin_cnt
+
+        return self.current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear
 
