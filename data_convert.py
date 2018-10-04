@@ -17,6 +17,12 @@ def decode(li):
             pass
     return li
 
+def encode_with_idx(val, idx):
+    try:
+        return val / data_reg[idx]
+    except:
+        return val
+
 def decode_with_idx(val, idx):
     try:
         return round(val * data_reg[idx], 10)

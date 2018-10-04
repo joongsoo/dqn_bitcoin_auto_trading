@@ -6,7 +6,7 @@ import random
 import dqn
 from collections import deque
 from env.train import Environment
-from data_convert import encode_money, encode_coin_cnt
+from data_convert import encode_money, encode_coin_cnt, encode_with_idx
 from multiprocessing import Pool
 from functools import partial
 
@@ -24,13 +24,13 @@ output_size = 3
 
 # nn param
 learning_rate = 1e-4
-batch_size = 100000
+batch_size = 12000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
 
 replay_buffer = deque()
-MAX_BUFFER_SIZE = 1000000
+MAX_BUFFER_SIZE = 100000
 TARGET_UPDATE_FREQUENCY = 10
 
 def get_from_idx(idx, target_list):
@@ -102,30 +102,32 @@ def main():
 
             die = False
             clear = False
-            state, before_money, before_coin_cnt = env.reset()
+            state, before_money, before_coin_cnt, before_buy_price = env.reset()
             before_money = encode_money(before_money)
             before_coin_cnt = encode_coin_cnt(before_coin_cnt)
+            before_buy_price = encode_with_idx(before_buy_price, 2)
 
             while not die and not clear:
                 # random action
                 if np.random.rand(1) < e or not is_learn_start():
                     action = env.get_random_actions()
                 else:
-                    action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt]]))
+                    action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt, before_buy_price]]))
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear = env.step(action)
+                current_step, before_money, before_coin_cnt, before_buy_price, now_money, next_state, next_money, next_coin_cnt, next_buy_price, reward, die, clear = env.step(action)
                 before_money = encode_money(before_money)
                 before_coin_cnt = encode_coin_cnt(before_coin_cnt)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
-
+                before_buy_price = encode_with_idx(before_buy_price, 2)
+                next_buy_price = encode_with_idx(next_buy_price, 2)
 
                 if die:
                     reward = -10000
 
-                replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
+                replay_buffer.append((state, [before_money, before_coin_cnt, before_buy_price], [next_money, next_coin_cnt, next_buy_price], action, reward, next_state))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
@@ -170,7 +172,7 @@ def main():
                 print("save file not found")
             """            
             if is_learn_start():
-                for _ in range(100):
+                for _ in range(300):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
                     print("loss : {}".format(loss))

@@ -30,7 +30,7 @@ class DQN:
 
             # input place holders
             self._X = tf.placeholder(tf.float64, [None, self.seq_length, self.data_dim], name="input_x")
-            self._MONEY = tf.placeholder(tf.float64, [None, 2], name="input_money")
+            self._MONEY = tf.placeholder(tf.float64, [None, 3], name="input_money")
             self._keep_prob = tf.placeholder(tf.float64, name="kp")
 
             multi_cells = rnn.MultiRNNCell([self.lstm_cell(self.data_dim, self._keep_prob) for _ in range(2)],

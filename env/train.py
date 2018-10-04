@@ -61,6 +61,7 @@ class Environment:
         self.money = start_money
         self.seq_size = seq_size
         self.coin_cnt = 0.
+        self.buy_price = 0
 
     def get_random_actions(self):
         return random.randint(0, 2)
@@ -69,7 +70,8 @@ class Environment:
         self.money = self.start_money
         self.current_step = 0
         self.coin_cnt = 0
-        return self.get_current_state(), self.money, self.coin_cnt
+        self.buy_price = 0
+        return self.get_current_state(), self.money, self.coin_cnt, self.buy_price
 
     def get_current_state(self):
         return self.data[self.current_step : self.current_step+self.seq_size]
@@ -89,6 +91,7 @@ class Environment:
         now_price = decode(copy.copy(current_state[-1]))[TARGET]
         before_money = self.money + self.coin_cnt * now_price
         before_coin_cnt = self.coin_cnt
+        before_buy_price = self.buy_price
 
         if action == self.MODE_BUY:
             available_money = round(self.money / 2)
@@ -98,6 +101,7 @@ class Environment:
                 self.money -= buy_cnt * now_price
                 buy_cnt = buy_cnt * 0.9985
                 self.coin_cnt += buy_cnt
+                self.buy_price = now_price
             elif self.coin_cnt == 0:
                 die = True
         elif action == self.MODE_SELL:
@@ -106,6 +110,7 @@ class Environment:
             else:
                 self.money += self.coin_cnt * now_price * 0.9985
                 self.coin_cnt = 0
+                self.buy_price = 0
 
         self.current_step += 1
 
@@ -123,6 +128,7 @@ class Environment:
 
         next_money = self.money
         next_coin_cnt = self.coin_cnt
+        next_buy_price = self.buy_price
 
-        return self.current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear
+        return self.current_step, before_money, before_coin_cnt, before_buy_price, now_money, next_state, next_money, next_coin_cnt, next_buy_price, reward, die, clear
 
