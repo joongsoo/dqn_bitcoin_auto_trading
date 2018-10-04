@@ -50,7 +50,10 @@ class DQN:
             output = tf.contrib.layers.fully_connected(rnn_output, 128, activation_fn=tf.nn.relu)
             output = tf.nn.dropout(output, keep_prob=self._keep_prob)
 
-            output = tf.contrib.layers.fully_connected(output + money, 64, activation_fn=tf.nn.relu)
+            output = tf.contrib.layers.fully_connected(output + money, 256, activation_fn=tf.nn.relu)
+            output = tf.nn.dropout(output, keep_prob=self._keep_prob)
+
+            output = tf.contrib.layers.fully_connected(output, 512, activation_fn=tf.nn.relu)
             output = tf.nn.dropout(output, keep_prob=self._keep_prob)
 
         self._Qpred = tf.contrib.layers.fully_connected(output, self.output_size,
@@ -83,3 +86,4 @@ class DQN:
             self._Y: y_stack,
             self._keep_prob: 0.7
         })
+

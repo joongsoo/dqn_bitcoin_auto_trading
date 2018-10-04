@@ -7,6 +7,8 @@ import dqn
 from collections import deque
 from env.train import Environment
 from data_convert import encode_money, encode_coin_cnt
+from multiprocessing import Pool
+from functools import partial
 
 
 
@@ -15,35 +17,41 @@ hidden_size = 3
 
 # 총 입력길이
 data_dim = 6
-sequence_length = 1440
+sequence_length = 144
 input_size = data_dim * sequence_length
 output_size = 3
 
 
 # nn param
-learning_rate = 1e-5
-batch_size = 10000
+learning_rate = 1e-4
+batch_size = 100000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
 
 replay_buffer = deque()
-MAX_BUFFER_SIZE = 100000
+MAX_BUFFER_SIZE = 1000000
 TARGET_UPDATE_FREQUENCY = 10
+
+def get_from_idx(idx, target_list):
+    return np.vstack([item[idx] for item in target_list])
 
 def is_learn_start():
     return len(replay_buffer) > min_learn_size
 
 def replay_train(mainDQN, targetDQN, train_batch):
+    #with Pool(4) as pool:
+    #    aa = pool.map(partial(get_from_idx, target_list=li), range(4))
     states = np.vstack([[x[0]] for x in train_batch])
     moneys = np.array([x[1] for x in train_batch])
-    actions = np.array([x[2] for x in train_batch])
-    rewards = np.array([x[3] for x in train_batch])
-    next_states = np.vstack([[x[4]] for x in train_batch])
+    next_moneys = np.array([x[2] for x in train_batch])
+    actions = np.array([x[3] for x in train_batch])
+    rewards = np.array([x[4] for x in train_batch])
+    next_states = np.vstack([[x[5]] for x in train_batch])
 
     X = states
 
-    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, moneys), axis=1)
+    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
 
     y = mainDQN.predict(states, moneys)
     y[np.arange(len(X)), actions] = Q_target
@@ -65,7 +73,7 @@ def get_copy_var_ops(dest_scope_name="target", src_scope_name="main"):
 
 def main():
     # init env
-    start_money = 100000
+    start_money = 1000000
     env = Environment(start_money, sequence_length)
 
     # run
@@ -90,7 +98,7 @@ def main():
         frame = 0
 
         while episode < max_episodes:
-            e = 1. / ((frame / 1000) + 1)
+            e = 1. / ((episode / 20) + 1)
 
             die = False
             clear = False
@@ -107,18 +115,21 @@ def main():
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, before_money, before_coin_cnt, now_money, next_state, reward, die, clear = env.step(action)
+                current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear = env.step(action)
                 before_money = encode_money(before_money)
                 before_coin_cnt = encode_coin_cnt(before_coin_cnt)
+                next_money = encode_money(next_money)
+                next_coin_cnt = encode_coin_cnt(next_coin_cnt)
+
 
                 if die:
                     reward = -10000
 
-                replay_buffer.append((state, [before_money, before_coin_cnt], action, reward, next_state))
+                replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
-
+                """
                 if is_learn_start():
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
@@ -133,15 +144,18 @@ def main():
                             print("save file not found")
 
                 state = next_state
-                frame += 1
-
+                if is_learn_start():
+                    frame += 1
+                """
+                state = next_state
 
             print("================  GAME OVER  ===================")
             print("episode(step) : {}({})".format(episode, current_step))
             print("최종 잔액 : ", now_money)
             print("================================================")
 
-            """ one episode one traning
+            # one episode one traning
+            """
             for _ in range(int(MAX_BUFFER_SIZE / batch_size)):
                 minibatch = random.sample(replay_buffer, batch_size)
                 loss, _ = replay_train(mainDQN, targetDQN, minibatch)
@@ -154,8 +168,20 @@ def main():
                 targetDQN.save(episode)
             except:
                 print("save file not found")
-            """
+            """            
             if is_learn_start():
+                for _ in range(100):
+                    minibatch = random.sample(replay_buffer, batch_size)
+                    loss, _ = replay_train(mainDQN, targetDQN, minibatch)
+                    print("loss : {}".format(loss))
+
+                sess.run(copy_ops)
+
+                try:
+                    mainDQN.save(episode)
+                    targetDQN.save(episode)
+                except:
+                    print("save file not found")
                 episode += 1
 
 

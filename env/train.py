@@ -6,7 +6,7 @@ import copy
 SQL_GET_DATA = """
 SELECT dt, avg(btc), avg(eth), avg(xrp), avg(btc_quantity), avg(eth_quantity), avg(xrp_quantity) FROM (
     SELECT
-        DATE_FORMAT(dt_kst, '%Y-%m-%d %H:%i') dt,
+        substring(DATE_FORMAT(dt_kst, '%Y-%m-%d %H:%i'), 1, 15) dt,
         CASE WHEN code='CRIX.UPBIT.KRW-BTC' THEN trade_price END AS btc,
         CASE WHEN code='CRIX.UPBIT.KRW-ETH' THEN trade_price END AS eth,
         CASE WHEN code='CRIX.UPBIT.KRW-XRP' THEN trade_price END AS xrp,
@@ -18,12 +18,13 @@ SELECT dt, avg(btc), avg(eth), avg(xrp), avg(btc_quantity), avg(eth_quantity), a
     WHERE (code='CRIX.UPBIT.KRW-BTC' 
     OR code='CRIX.UPBIT.KRW-ETH' 
     OR code='CRIX.UPBIT.KRW-XRP')
-    AND dt_kst >= STR_TO_DATE('2017-09-25 22:05:00', '%Y-%m-%d %H:%i:%s')
+    AND dt_kst >= STR_TO_DATE('2017-11-15 00:00:00', '%Y-%m-%d %H:%i:%s')
     ORDER BY dt_kst ASC
 ) A
 GROUP BY dt
 ORDER BY dt ASC
 """
+
 
 IDX_XRP = 2
 
@@ -120,5 +121,8 @@ class Environment:
         if self.current_step + self.seq_size >= len(self.data):
             clear = True
 
-        return self.current_step, before_money, before_coin_cnt, now_money, next_state, reward, die, clear
+        next_money = self.money
+        next_coin_cnt = self.coin_cnt
+
+        return self.current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear
 
