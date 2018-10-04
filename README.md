@@ -9,6 +9,7 @@ env/train.py
 ==> real.py 추가 예정
 
 ## Neural net design
+![image](https://user-images.githubusercontent.com/15869525/46462596-d12eee80-c7fc-11e8-8325-924e745799ad.png)
 
 
 완성후 readme 작성예정
