@@ -29,13 +29,14 @@ batch_size = 100000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
+replay_buffer = deque()
+
 try:
     with open("save/train_queue.pkl", "rb") as f:
         replay_buffer = pickle.load(f)
         print("train_queue loaded")
 except FileNotFoundError:
     print("train_queue file not exists")
-    replay_buffer = deque()
 
 MAX_BUFFER_SIZE = 1000000
 TARGET_UPDATE_FREQUENCY = 10
