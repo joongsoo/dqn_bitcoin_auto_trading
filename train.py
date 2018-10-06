@@ -7,6 +7,7 @@ import dqn
 from collections import deque
 from env.train import Environment
 from data_convert import encode_money, encode_coin_cnt
+import pickle
 from multiprocessing import Pool
 from functools import partial
 
@@ -28,8 +29,15 @@ batch_size = 100000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
-
 replay_buffer = deque()
+
+try:
+    with open("save/train_queue.pkl", "rb") as f:
+        replay_buffer = pickle.load(f)
+        print("train_queue loaded")
+except FileNotFoundError:
+    print("train_queue file not exists")
+
 MAX_BUFFER_SIZE = 1000000
 TARGET_UPDATE_FREQUENCY = 10
 
@@ -177,6 +185,9 @@ def main():
                 print("save file not found")
             """            
             if is_learn_start():
+                with open("save/train_queue.pkl", "wb") as f:
+                    pickle.dump(replay_buffer, f)
+
                 for _ in range(200):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
@@ -189,6 +200,7 @@ def main():
                     targetDQN.save(episode)
                 except:
                     print("save file not found")
+
                 episode += 1
 
 
