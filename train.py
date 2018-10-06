@@ -23,7 +23,7 @@ output_size = 3
 
 
 # nn param
-learning_rate = 1e-4
+learning_rate = 1e-2
 batch_size = 100000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
@@ -34,21 +34,28 @@ MAX_BUFFER_SIZE = 1000000
 TARGET_UPDATE_FREQUENCY = 10
 
 def get_from_idx(idx, target_list):
-    return np.vstack([item[idx] for item in target_list])
+    return np.vstack([[item[idx]] for item in target_list])
 
 def is_learn_start():
     return len(replay_buffer) > min_learn_size
 
 def replay_train(mainDQN, targetDQN, train_batch):
     #with Pool(4) as pool:
-    #    aa = pool.map(partial(get_from_idx, target_list=li), range(4))
+    #    result_data = pool.map(partial(get_from_idx, target_list=train_batch), range(6))
+
+    #states = result_data[0]
+    #moneys = result_data[1]
+    #next_moneys = result_data[2]
+    #actions = result_data[3]
+    #rewards = result_data[4]
+    #next_states = result_data[5]
+
     states = np.vstack([[x[0]] for x in train_batch])
     moneys = np.array([x[1] for x in train_batch])
     next_moneys = np.array([x[2] for x in train_batch])
     actions = np.array([x[3] for x in train_batch])
     rewards = np.array([x[4] for x in train_batch])
     next_states = np.vstack([[x[5]] for x in train_batch])
-
     X = states
 
     Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
@@ -82,7 +89,7 @@ def main():
         targetDQN = dqn.DQN(sess, sequence_length, data_dim, output_size, learning_rate, name="target")
         tf.global_variables_initializer().run()
 
-        last_episode = 0
+        last_episode = 87
 
         try:
             mainDQN.restore(last_episode)
@@ -108,7 +115,7 @@ def main():
 
             while not die and not clear:
                 # random action
-                if np.random.rand(1) < e or not is_learn_start():
+                if np.random.rand(1) < e:
                     action = env.get_random_actions()
                 else:
                     action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt]]))
@@ -170,7 +177,7 @@ def main():
                 print("save file not found")
             """            
             if is_learn_start():
-                for _ in range(100):
+                for _ in range(200):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
                     print("loss : {}".format(loss))
