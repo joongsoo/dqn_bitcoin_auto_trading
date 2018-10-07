@@ -7,6 +7,7 @@ import dqn
 from collections import deque
 from env.train import Environment
 from data_convert import encode_money, encode_coin_cnt
+from sms_util import send_sms
 import pickle
 from multiprocessing import Pool
 from functools import partial
@@ -166,8 +167,13 @@ def main():
 
             print("================  GAME OVER  ===================")
             print("episode(step) : {}({})".format(episode, current_step))
-            print("최종 잔액 : ", now_money)
+            print("최종 잔액 : {}".format(now_money))
             print("================================================")
+
+            sms_str = "episode(step) : {}({})\n".format(episode, current_step) \
+                      + "최종 잔액 : {}".format(now_money)
+
+            send_sms(sms_str)
 
             # one episode one traning
             """
