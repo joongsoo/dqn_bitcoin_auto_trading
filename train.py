@@ -171,7 +171,7 @@ def main():
             print("================================================")
 
             sms_str = "episode(step) : {}({})\n".format(episode, current_step) \
-                      + "최종 잔액 : {}".format(now_money)
+                      + "balance : {}".format(now_money)
 
             send_sms(sms_str)
 
