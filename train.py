@@ -137,7 +137,7 @@ def main():
                 reward = encode_money(reward)
 
                 if die or penalty:
-                    reward = -1000000
+                    reward = -10
 
                 replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
 
