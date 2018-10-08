@@ -170,11 +170,6 @@ def main():
             print("최종 잔액 : {}".format(now_money))
             print("================================================")
 
-            sms_str = "episode(step) : {}({})\n".format(episode, current_step) \
-                      + "balance : {}".format(now_money)
-
-            send_sms(sms_str)
-
             # one episode one traning
             """
             for _ in range(int(MAX_BUFFER_SIZE / batch_size)):
@@ -191,6 +186,11 @@ def main():
                 print("save file not found")
             """            
             if is_learn_start():
+                sms_str = "episode(step) : {}({})\n".format(episode, current_step) \
+                          + "balance : {}".format(now_money)
+
+                send_sms(sms_str)
+                
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
