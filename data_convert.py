@@ -1,8 +1,8 @@
 
 
 # 데이터 값 범위 정규화를 위한 보정 값 (0~1 사이의 수로 만들어주기 위함)
-data_reg = [10000000.0, 1000000.0, 1000.0, # 가격 [BTC, ETH, XRP]
-            1000.0, 10000.0, 10000000.0] # 거래량 [BTC, ETH, XRP]
+data_reg = [100000.0, 10000.0, 10.0, # 가격 [BTC, ETH, XRP]
+            10.0, 100.0, 100000.0] # 거래량 [BTC, ETH, XRP]
 
 def encode(li):
     for i in range(len(li)):
@@ -23,9 +23,9 @@ def decode_with_idx(val, idx):
     except:
         return val
 
-# 10억단위로 나눈다.
+# 100만 단위로 나눈다.
 def encode_money(money):
-    return float(money) / 1000000000.
+    return float(money) / 1000000.
 
 def encode_coin_cnt(coin_cnt):
-    return float(coin_cnt) / 100000.
+    return float(coin_cnt) / 1000.

@@ -29,14 +29,14 @@ class DQN:
         with tf.variable_scope(self.net_name):
 
             # input place holders
-            self._X = tf.placeholder(tf.float64, [None, self.seq_length, self.data_dim], name="input_x")
-            self._MONEY = tf.placeholder(tf.float64, [None, 2], name="input_money")
-            self._keep_prob = tf.placeholder(tf.float64, name="kp")
+            self._X = tf.placeholder(tf.float32, [None, self.seq_length, self.data_dim], name="input_x")
+            self._MONEY = tf.placeholder(tf.float32, [None, 2], name="input_money")
+            self._keep_prob = tf.placeholder(tf.float32, name="kp")
 
             multi_cells = rnn.MultiRNNCell([self.lstm_cell(self.data_dim, self._keep_prob) for _ in range(2)],
                                            state_is_tuple=True)
 
-            outputs, _states = tf.nn.dynamic_rnn(multi_cells, self._X, dtype=tf.float64)
+            outputs, _states = tf.nn.dynamic_rnn(multi_cells, self._X, dtype=tf.float32)
 
             rnn_output = tf.contrib.layers.fully_connected(outputs, self.data_dim,
                                                             activation_fn=tf.nn.relu)
@@ -59,7 +59,7 @@ class DQN:
         self._Qpred = tf.contrib.layers.fully_connected(output, self.output_size,
                                                         activation_fn=tf.nn.relu)
 
-        self._Y = tf.placeholder(shape=[None, self.output_size], dtype=tf.float64)
+        self._Y = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
 
         self._loss = tf.reduce_mean(tf.square(self._Y - self._Qpred))
 

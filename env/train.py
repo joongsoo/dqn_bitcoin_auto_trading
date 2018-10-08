@@ -87,8 +87,6 @@ class Environment:
         penalty = False
         current_state = self.get_current_state()
         now_price = decode(copy.copy(current_state[-1]))[TARGET]
-        before_money = self.money + self.coin_cnt * now_price
-        before_coin_cnt = self.coin_cnt
 
         if action == self.MODE_BUY:
             available_money = round(self.money / 2)
@@ -115,7 +113,7 @@ class Environment:
         reward = now_money
 
         if penalty:
-            reward = -10000
+            reward = -1000000
 
         # 데이터의 끝에 도달하면 클리어
         if self.current_step + self.seq_size >= len(self.data):
@@ -124,5 +122,5 @@ class Environment:
         next_money = self.money
         next_coin_cnt = self.coin_cnt
 
-        return self.current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear
+        return self.current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear
 

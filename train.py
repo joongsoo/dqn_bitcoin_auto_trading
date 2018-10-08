@@ -25,8 +25,8 @@ output_size = 3
 
 
 # nn param
-learning_rate = 1e-2
-batch_size = 100000
+learning_rate = 1e-5
+batch_size = 200000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
@@ -60,8 +60,8 @@ def replay_train(mainDQN, targetDQN, train_batch):
     #next_states = result_data[5]
 
     states = np.vstack([[x[0]] for x in train_batch])
-    moneys = np.array([x[1] for x in train_batch])
-    next_moneys = np.array([x[2] for x in train_batch])
+    moneys = np.vstack([x[1] for x in train_batch])
+    next_moneys = np.vstack([x[2] for x in train_batch])
     actions = np.array([x[3] for x in train_batch])
     rewards = np.array([x[4] for x in train_batch])
     next_states = np.vstack([[x[5]] for x in train_batch])
@@ -98,7 +98,7 @@ def main():
         targetDQN = dqn.DQN(sess, sequence_length, data_dim, output_size, learning_rate, name="target")
         tf.global_variables_initializer().run()
 
-        last_episode = 87
+        last_episode = 0
 
         try:
             mainDQN.restore(last_episode)
@@ -131,15 +131,13 @@ def main():
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, before_money, before_coin_cnt, now_money, next_state, next_money, next_coin_cnt, reward, die, clear = env.step(action)
-                before_money = encode_money(before_money)
-                before_coin_cnt = encode_coin_cnt(before_coin_cnt)
+                current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear = env.step(action)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
-
+                reward = encode_money(reward)
 
                 if die:
-                    reward = -10000
+                    reward = -1000000
 
                 replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
 
@@ -164,6 +162,8 @@ def main():
                     frame += 1
                 """
                 state = next_state
+                before_money = next_money
+                before_coin_cnt = next_coin_cnt
 
             print("================  GAME OVER  ===================")
             print("episode(step) : {}({})".format(episode, current_step))
@@ -194,7 +194,7 @@ def main():
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
-                for _ in range(200):
+                for _ in range(100):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
                     print("loss : {}".format(loss))
