@@ -124,7 +124,7 @@ def main():
 
             while not die and not clear:
                 # random action
-                if np.random.rand(1) < e:
+                if np.random.rand(1) < e or not is_learn_start():
                     action = env.get_random_actions()
                 else:
                     action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt]]))
