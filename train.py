@@ -131,12 +131,12 @@ def main():
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear = env.step(action)
+                current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear, penalty = env.step(action)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
                 reward = encode_money(reward)
 
-                if die:
+                if die or penalty:
                     reward = -1000000
 
                 replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
@@ -190,7 +190,7 @@ def main():
                           + "balance : {}".format(now_money)
 
                 send_sms(sms_str)
-                
+
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 

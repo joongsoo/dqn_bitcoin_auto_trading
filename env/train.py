@@ -98,6 +98,8 @@ class Environment:
                 self.coin_cnt += buy_cnt
             elif self.coin_cnt == 0:
                 die = True
+            else: # 코인은 많아도 현금이 없을때 구매방지
+                penalty = True
         elif action == self.MODE_SELL:
             if self.coin_cnt == 0:
                 penalty = True
@@ -112,9 +114,6 @@ class Environment:
         now_money = self.money + self.coin_cnt * future_price
         reward = now_money
 
-        if penalty:
-            reward = -1000000
-
         # 데이터의 끝에 도달하면 클리어
         if self.current_step + self.seq_size >= len(self.data):
             clear = True
@@ -122,5 +121,5 @@ class Environment:
         next_money = self.money
         next_coin_cnt = self.coin_cnt
 
-        return self.current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear
+        return self.current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear, penalty
 
