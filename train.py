@@ -40,7 +40,7 @@ except FileNotFoundError:
     print("train_queue file not exists")
 
 MAX_BUFFER_SIZE = 1000000
-TARGET_UPDATE_FREQUENCY = 10
+TARGET_UPDATE_FREQUENCY = 5
 
 def get_from_idx(idx, target_list):
     return np.vstack([[item[idx]] for item in target_list])
@@ -194,12 +194,14 @@ def main():
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
-                for _ in range(100):
+                for idx in range(200):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch)
-                    print("loss : {}".format(loss))
 
-                sess.run(copy_ops)
+                    if idx % TARGET_UPDATE_FREQUENCY == 0:
+                        sess.run(copy_ops)
+
+                    print("loss : {}".format(loss))
 
                 try:
                     mainDQN.save(episode)
