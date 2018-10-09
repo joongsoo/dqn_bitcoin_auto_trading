@@ -25,7 +25,7 @@ def decode_with_idx(val, idx):
 
 # 100만 단위로 나눈다.
 def encode_money(money):
-    return float(money) / 1000000.
+    return float(money) / 100000.
 
 def encode_coin_cnt(coin_cnt):
-    return float(coin_cnt) / 1000.
+    return float(coin_cnt) / 100.
