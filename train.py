@@ -26,7 +26,7 @@ output_size = 3
 
 # nn param
 learning_rate = 1e-5
-batch_size = 200000
+batch_size = 25000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
@@ -48,7 +48,7 @@ def get_from_idx(idx, target_list):
 def is_learn_start():
     return len(replay_buffer) > min_learn_size
 
-def replay_train(mainDQN, targetDQN, train_batch):
+def replay_train(mainDQN, targetDQN, train_batch, episode):
     #with Pool(4) as pool:
     #    result_data = pool.map(partial(get_from_idx, target_list=train_batch), range(6))
 
@@ -70,7 +70,11 @@ def replay_train(mainDQN, targetDQN, train_batch):
     Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
 
     y = mainDQN.predict(states, moneys)
+    if episode > 1:
+        print(y)
     y[np.arange(len(X)), actions] = Q_target
+    if episode > 1:
+        print(y)
 
     return mainDQN.update(X, moneys, y)
 
@@ -134,10 +138,9 @@ def main():
                 current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear, penalty = env.step(action)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
-                reward = encode_money(reward)
 
                 if die or penalty:
-                    reward = -10
+                    reward = 0
 
                 replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
 
@@ -186,7 +189,7 @@ def main():
                 print("save file not found")
             """            
             if is_learn_start():
-                sms_str = "episode(step) : {}({})\n".format(episode, current_step) \
+                sms_str = "[home]\nepisode(step) : {}({})\n".format(episode, current_step) \
                           + "balance : {}".format(now_money)
 
                 send_sms(sms_str)
@@ -194,9 +197,9 @@ def main():
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
-                for idx in range(200):
+                for idx in range(100):
                     minibatch = random.sample(replay_buffer, batch_size)
-                    loss, _ = replay_train(mainDQN, targetDQN, minibatch)
+                    loss, _ = replay_train(mainDQN, targetDQN, minibatch, episode)
 
                     if idx % TARGET_UPDATE_FREQUENCY == 0:
                         sess.run(copy_ops)
