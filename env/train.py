@@ -61,6 +61,7 @@ class Environment:
         self.money = start_money
         self.seq_size = seq_size
         self.coin_cnt = 0.
+        self.buy_list = []
 
     def get_random_actions(self):
         return random.randint(0, 2)
@@ -69,7 +70,8 @@ class Environment:
         self.money = self.start_money
         self.current_step = 0
         self.coin_cnt = 0
-        return self.get_current_state(), self.money, self.coin_cnt
+        avg_buy_price = 0
+        return self.get_current_state(), self.money, self.coin_cnt, avg_buy_price
 
     def get_current_state(self):
         return self.data[self.current_step : self.current_step+self.seq_size]
@@ -87,15 +89,19 @@ class Environment:
         penalty = False
         current_state = self.get_current_state()
         now_price = decode(copy.copy(current_state[-1]))[TARGET]
+        reward = 0
 
         if action == self.MODE_BUY:
             available_money = round(self.money / 2)
 
-            if available_money > now_price:
+            if self.money > now_price:
                 buy_cnt = round(available_money / now_price)
                 self.money -= buy_cnt * now_price
                 buy_cnt = buy_cnt * 0.9985
                 self.coin_cnt += buy_cnt
+
+                # 구매 리스트에 추가
+                self.buy_list.append({'price': now_price, 'cnt': buy_cnt})
             elif self.coin_cnt == 0:
                 die = True
             else: # 코인은 많아도 현금이 없을때 구매방지
@@ -104,15 +110,24 @@ class Environment:
             if self.coin_cnt == 0:
                 penalty = True
             else:
-                self.money += self.coin_cnt * now_price * 0.9985
+                # 이득 계산
+                total_buy_price = 0.
+                for item in self.buy_list:
+                    total_buy_price += item['price'] * item['cnt']
+
+                total_sell_price = self.coin_cnt * now_price * 0.9985
+
+                reward = total_buy_price - total_sell_price
+
+                self.money += total_sell_price
                 self.coin_cnt = 0
+                self.buy_list = []
 
         self.current_step += 1
 
         next_state = self.get_current_state()
         future_price = decode(copy.copy(next_state[-1]))[TARGET]
         now_money = self.money + self.coin_cnt * future_price
-        reward = now_money
 
         # 데이터의 끝에 도달하면 클리어
         if self.current_step + self.seq_size >= len(self.data):
@@ -121,5 +136,16 @@ class Environment:
         next_money = self.money
         next_coin_cnt = self.coin_cnt
 
-        return self.current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear, penalty
+        total_buy_price = 0.
+        total_buy_cnt = 0
+        for item in self.buy_list:
+            total_buy_price += item['price'] * item['cnt']
+            total_buy_cnt += item['cnt']
+
+        if total_buy_price == 0 or total_buy_cnt == 0:
+            next_avg_buy_price = 0.
+        else:
+            next_avg_buy_price = total_buy_price / total_buy_cnt
+
+        return self.current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty
 

@@ -6,7 +6,7 @@ import random
 import dqn
 from collections import deque
 from env.train import Environment
-from data_convert import encode_money, encode_coin_cnt
+from data_convert import encode_money, encode_coin_cnt, encode_avg_price
 from sms_util import send_sms
 import pickle
 from multiprocessing import Pool
@@ -25,8 +25,8 @@ output_size = 3
 
 
 # nn param
-learning_rate = 1e-5
-batch_size = 25000
+learning_rate = 1e-3
+batch_size = 200000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
@@ -122,9 +122,10 @@ def main():
 
             die = False
             clear = False
-            state, before_money, before_coin_cnt = env.reset()
+            state, before_money, before_coin_cnt, before_avg_price = env.reset()
             before_money = encode_money(before_money)
             before_coin_cnt = encode_coin_cnt(before_coin_cnt)
+            before_avg_price = encode_avg_price(before_avg_price)
 
             while not die and not clear:
                 # random action
@@ -135,14 +136,15 @@ def main():
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear, penalty = env.step(action)
+                current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty = env.step(action)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
+                next_avg_buy_price = encode_avg_price(next_avg_buy_price)
 
                 if die or penalty:
                     reward = 0
 
-                replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
+                replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
