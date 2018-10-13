@@ -132,7 +132,7 @@ def main():
                 if np.random.rand(1) < e or not is_learn_start():
                     action = env.get_random_actions()
                 else:
-                    action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt]]))
+                    action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt, before_avg_price]]))
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
@@ -169,6 +169,7 @@ def main():
                 state = next_state
                 before_money = next_money
                 before_coin_cnt = next_coin_cnt
+                before_avg_price = next_avg_buy_price
 
             print("================  GAME OVER  ===================")
             print("episode(step) : {}({})".format(episode, current_step))
