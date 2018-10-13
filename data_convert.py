@@ -27,5 +27,8 @@ def decode_with_idx(val, idx):
 def encode_money(money):
     return float(money) / 100000.
 
+def encode_avg_price(money):
+    return float(money) / 1000.
+
 def encode_coin_cnt(coin_cnt):
     return float(coin_cnt) / 100.

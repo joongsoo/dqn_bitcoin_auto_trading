@@ -32,7 +32,7 @@ class DQN:
 
             # input place holders
             self._X = tf.placeholder(tf.float32, [None, self.seq_length, self.data_dim], name="input_x")
-            self._MONEY = tf.placeholder(tf.float32, [None, 2], name="input_money")
+            self._MONEY = tf.placeholder(tf.float32, [None, 3], name="input_money")
             self._keep_prob = tf.placeholder(tf.float32, name="kp")
             self._train_mode = tf.placeholder(tf.bool, name='train_mode')
 
