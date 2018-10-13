@@ -9,8 +9,6 @@ from env.train import Environment
 from data_convert import encode_money, encode_coin_cnt
 from sms_util import send_sms
 import pickle
-from multiprocessing import Pool
-from functools import partial
 
 
 
@@ -25,8 +23,8 @@ output_size = 3
 
 
 # nn param
-learning_rate = 1e-2
-batch_size = 25000
+learning_rate = 1e-3
+batch_size = 80000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
@@ -49,16 +47,6 @@ def is_learn_start():
     return len(replay_buffer) > min_learn_size
 
 def replay_train(mainDQN, targetDQN, train_batch, episode):
-    #with Pool(4) as pool:
-    #    result_data = pool.map(partial(get_from_idx, target_list=train_batch), range(6))
-
-    #states = result_data[0]
-    #moneys = result_data[1]
-    #next_moneys = result_data[2]
-    #actions = result_data[3]
-    #rewards = result_data[4]
-    #next_states = result_data[5]
-
     states = np.vstack([[x[0]] for x in train_batch])
     moneys = np.vstack([x[1] for x in train_batch])
     next_moneys = np.vstack([x[2] for x in train_batch])
@@ -115,7 +103,6 @@ def main():
 
         episode = last_episode
         max_episodes = 30000
-        frame = 0
 
         while episode < max_episodes:
             e = 1. / ((episode / 20) + 1)
@@ -146,24 +133,8 @@ def main():
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
-                """
-                if is_learn_start():
-                    minibatch = random.sample(replay_buffer, batch_size)
-                    loss, _ = replay_train(mainDQN, targetDQN, minibatch)
-                    print("{}-{} : action[ {} ] / loss[ {} ]  /  money[ {} ] ".format(episode, current_step, action, loss, now_money))
 
-                    if current_step % TARGET_UPDATE_FREQUENCY == 0:
-                        sess.run(copy_ops)
-                        try:
-                            mainDQN.save(episode)
-                            targetDQN.save(episode)
-                        except:
-                            print("save file not found")
 
-                state = next_state
-                if is_learn_start():
-                    frame += 1
-                """
                 state = next_state
                 before_money = next_money
                 before_coin_cnt = next_coin_cnt
@@ -173,21 +144,7 @@ def main():
             print("최종 잔액 : {}".format(now_money))
             print("================================================")
 
-            # one episode one traning
-            """
-            for _ in range(int(MAX_BUFFER_SIZE / batch_size)):
-                minibatch = random.sample(replay_buffer, batch_size)
-                loss, _ = replay_train(mainDQN, targetDQN, minibatch)
-                print("loss : {}".format(loss))
 
-            sess.run(copy_ops)
-            
-            try:
-                mainDQN.save(episode)
-                targetDQN.save(episode)
-            except:
-                print("save file not found")
-            """            
             if is_learn_start():
                 sms_str = "[home]\nepisode(step) : {}({})\n".format(episode, current_step) \
                           + "balance : {}".format(now_money)
