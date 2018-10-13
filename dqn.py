@@ -39,7 +39,7 @@ class DQN:
             bn_params = {
                 'is_training': self._train_mode,
                 'decay': 0.9,
-                'updates_collections': None
+                'fused': False
             }
 
             multi_cells = rnn.MultiRNNCell([self.lstm_cell(self.data_dim, self._keep_prob) for _ in range(2)],
