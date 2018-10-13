@@ -25,7 +25,7 @@ output_size = 3
 
 
 # nn param
-learning_rate = 1e-5
+learning_rate = 1e-2
 batch_size = 25000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
