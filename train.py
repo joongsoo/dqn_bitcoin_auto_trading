@@ -26,7 +26,7 @@ output_size = 3
 
 # nn param
 learning_rate = 1e-3
-batch_size = 200000
+batch_size = 180000
 min_learn_size = int(batch_size * 1.5)
 dis = 0.9 # 미래가중치
 
@@ -200,7 +200,7 @@ def main():
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
-                for idx in range(100):
+                for idx in range(200):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch, episode)
 
