@@ -128,7 +128,7 @@ def main():
 
                 finish = die or penalty
                 if finish:
-                    reward = 0
+                    reward = -1000000.
 
                 replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state, finish))
 
@@ -154,7 +154,7 @@ def main():
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
-                for idx in range(200):
+                for idx in range(100):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch, episode)
 
