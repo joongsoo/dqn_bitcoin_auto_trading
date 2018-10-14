@@ -6,7 +6,7 @@ import random
 import dqn
 from collections import deque
 from env.train import Environment
-from data_convert import encode_money, encode_coin_cnt
+from data_convert import encode_money, encode_coin_cnt, encode_avg_price
 from sms_util import send_sms
 import pickle
 
@@ -106,27 +106,29 @@ def main():
 
             die = False
             clear = False
-            state, before_money, before_coin_cnt = env.reset()
+            state, before_money, before_coin_cnt, before_avg_price = env.reset()
             before_money = encode_money(before_money)
             before_coin_cnt = encode_coin_cnt(before_coin_cnt)
+            before_avg_price = encode_avg_price(before_avg_price)
 
             while not die and not clear:
                 # random action
                 if np.random.rand(1) < e or not is_learn_start():
                     action = env.get_random_actions()
                 else:
-                    action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt]]))
+                    action = np.argmax(targetDQN.predict([state], [[before_money, before_coin_cnt, before_avg_price]]))
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, now_money, next_state, next_money, next_coin_cnt, reward, die, clear, penalty = env.step(action)
+                current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty = env.step(action)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
+                next_avg_buy_price = encode_avg_price(next_avg_buy_price)
 
                 if die or penalty:
                     reward = 0
 
-                replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
+                replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
@@ -134,6 +136,7 @@ def main():
                 state = next_state
                 before_money = next_money
                 before_coin_cnt = next_coin_cnt
+                before_avg_price = next_avg_buy_price
 
             print("================  GAME OVER  ===================")
             print("episode(step) : {}({})".format(episode, current_step))
@@ -149,7 +152,7 @@ def main():
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
-                for idx in range(100):
+                for idx in range(200):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch, episode)
 
