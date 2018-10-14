@@ -50,9 +50,10 @@ def replay_train(mainDQN, targetDQN, train_batch, episode):
     actions = np.array([x[3] for x in train_batch])
     rewards = np.array([x[4] for x in train_batch])
     next_states = np.vstack([[x[5]] for x in train_batch])
+    finish = np.array([x[6] for x in train_batch])
     X = states
 
-    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
+    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1) * ~finish
 
     y = mainDQN.predict(states, moneys)
     if episode > 1:
@@ -125,10 +126,11 @@ def main():
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
                 next_avg_buy_price = encode_avg_price(next_avg_buy_price)
 
-                if die or penalty:
-                    reward = 0
+                finish = die or penalty
+                if finish:
+                    reward = -1000000.
 
-                replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state))
+                replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state, finish))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
@@ -152,7 +154,7 @@ def main():
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
 
-                for idx in range(200):
+                for idx in range(100):
                     minibatch = random.sample(replay_buffer, batch_size)
                     loss, _ = replay_train(mainDQN, targetDQN, minibatch, episode)
 
