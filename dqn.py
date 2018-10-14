@@ -80,9 +80,7 @@ class DQN:
             output = tf.nn.dropout(output, keep_prob=self._keep_prob)
 
         self._Qpred = fully_connected(output, self.output_size, activation_fn=tf.nn.relu,
-                                                           weights_initializer=variance_scaling_initializer(dtype=tf.float32),
-                                                            normalizer_fn=batch_norm,
-                                                            normalizer_params=bn_params)
+                                                           weights_initializer=variance_scaling_initializer(dtype=tf.float32))
 
         self._Y = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
 
