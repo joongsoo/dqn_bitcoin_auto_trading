@@ -32,7 +32,7 @@ class DQN:
 
             # input place holders
             self._X = tf.placeholder(tf.float32, [None, self.seq_length, self.data_dim], name="input_x")
-            self._MONEY = tf.placeholder(tf.float32, [None, 2], name="input_money")
+            self._MONEY = tf.placeholder(tf.float32, [None, 3], name="input_money")
             self._keep_prob = tf.placeholder(tf.float32, name="kp")
             self._train_mode = tf.placeholder(tf.bool, name='train_mode')
 
@@ -80,9 +80,7 @@ class DQN:
             output = tf.nn.dropout(output, keep_prob=self._keep_prob)
 
         self._Qpred = fully_connected(output, self.output_size, activation_fn=tf.nn.relu,
-                                                           weights_initializer=variance_scaling_initializer(dtype=tf.float32),
-                                                            normalizer_fn=batch_norm,
-                                                            normalizer_params=bn_params)
+                                                           weights_initializer=variance_scaling_initializer(dtype=tf.float32))
 
         self._Y = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)
 
