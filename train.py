@@ -50,7 +50,7 @@ def replay_train(mainDQN, targetDQN, train_batch, episode):
     actions = np.array([x[3] for x in train_batch])
     rewards = np.array([x[4] for x in train_batch])
     next_states = np.vstack([[x[5]] for x in train_batch])
-    finish = np.vstack([[x[6]] for x in train_batch])
+    finish = np.array([x[6] for x in train_batch])
     X = states
 
     Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1) * ~finish
