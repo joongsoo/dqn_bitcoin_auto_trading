@@ -46,7 +46,7 @@ def get_from_idx(idx, target_list):
 def is_learn_start():
     return len(replay_buffer) > min_learn_size
 
-def replay_train(mainDQN, targetDQN, train_batch, episode):
+def replay_train(mainDQN, targetDQN, train_batch):
     states = np.vstack([[x[0]] for x in train_batch])
     moneys = np.vstack([x[1] for x in train_batch])
     next_moneys = np.vstack([x[2] for x in train_batch])
@@ -58,11 +58,9 @@ def replay_train(mainDQN, targetDQN, train_batch, episode):
     Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
 
     y = mainDQN.predict(states, moneys)
-    if episode > 1:
-        print(y)
+    print(y)
     y[np.arange(len(X)), actions] = Q_target
-    if episode > 1:
-        print(y)
+    print(y)
 
     return mainDQN.update(X, moneys, y)
 
@@ -156,7 +154,7 @@ def main():
 
                 for idx in range(100):
                     minibatch = random.sample(replay_buffer, batch_size)
-                    loss, _ = replay_train(mainDQN, targetDQN, minibatch, episode)
+                    loss, _ = replay_train(mainDQN, targetDQN, minibatch)
 
                     if idx % TARGET_UPDATE_FREQUENCY == 0:
                         sess.run(copy_ops)
