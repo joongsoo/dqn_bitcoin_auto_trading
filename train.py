@@ -50,9 +50,10 @@ def replay_train(mainDQN, targetDQN, train_batch, episode):
     actions = np.array([x[3] for x in train_batch])
     rewards = np.array([x[4] for x in train_batch])
     next_states = np.vstack([[x[5]] for x in train_batch])
+    finish = np.vstack([[x[6]] for x in train_batch])
     X = states
 
-    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
+    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1) * ~finish
 
     y = mainDQN.predict(states, moneys)
     if episode > 1:
@@ -123,10 +124,11 @@ def main():
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
 
-                if die or penalty:
+                finish = die or penalty
+                if finish:
                     reward = 0
 
-                replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state))
+                replay_buffer.append((state, [before_money, before_coin_cnt], [next_money, next_coin_cnt], action, reward, next_state, finish))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
