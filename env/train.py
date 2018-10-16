@@ -113,7 +113,10 @@ class Environment:
                 total_sell_price = self.coin_cnt * now_price * 0.9985
 
                 # 총 판매 금액에서 총 구매 금액을 빼면 얼마가 이득인지 나온다.
-                reward = total_sell_price / total_buy_price * 100.
+                if total_sell_price > total_buy_price:
+                    reward = total_sell_price / total_buy_price * 100.
+                elif total_sell_price < total_buy_price:
+                    reward = -(total_buy_price / total_sell_price * 100.)
 
                 self.money += total_sell_price
                 self.coin_cnt = 0
