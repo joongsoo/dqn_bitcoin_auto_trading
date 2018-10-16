@@ -143,5 +143,8 @@ class Environment:
         else:
             next_avg_buy_price = total_buy_price / total_buy_cnt
 
+        if self.coin_cnt == 0 and self.money < future_price:
+            die = True
+
         return self.current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty
 
