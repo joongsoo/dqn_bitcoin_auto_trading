@@ -86,7 +86,6 @@ class Environment:
 
         die = False
         clear = False
-        penalty = False
         current_state = self.get_current_state()
         now_price = decode(copy.copy(current_state[-1]))[TARGET]
         reward = 0
@@ -114,7 +113,7 @@ class Environment:
                 total_sell_price = self.coin_cnt * now_price * 0.9985
 
                 # 총 판매 금액에서 총 구매 금액을 빼면 얼마가 이득인지 나온다.
-                reward = total_sell_price - total_buy_price
+                reward = total_sell_price / total_buy_price * 100.
 
                 self.money += total_sell_price
                 self.coin_cnt = 0
@@ -147,5 +146,5 @@ class Environment:
         if self.coin_cnt == 0 and self.money < future_price:
             die = True
 
-        return self.current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty
+        return self.current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear
 
