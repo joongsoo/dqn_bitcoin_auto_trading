@@ -104,12 +104,8 @@ class Environment:
                 self.buy_list.append({'price': now_price, 'cnt': buy_cnt})
             elif self.coin_cnt == 0:
                 die = True
-            else: # 코인은 많아도 현금이 없을때 구매방지
-                penalty = True
         elif action == self.MODE_SELL:
-            if self.coin_cnt == 0:
-                penalty = True
-            else:
+            if self.coin_cnt != 0:
                 # 이득 계산
                 total_buy_price = 0.
                 for item in self.buy_list:
@@ -146,6 +142,9 @@ class Environment:
             next_avg_buy_price = 0.
         else:
             next_avg_buy_price = total_buy_price / total_buy_cnt
+
+        if self.coin_cnt == 0 and self.money < future_price:
+            die = True
 
         return self.current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty
 

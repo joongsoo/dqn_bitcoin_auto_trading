@@ -21,7 +21,7 @@ output_size = 3
 
 
 # nn param
-learning_rate = 1e-2
+learning_rate = 1e-3
 batch_size = 70000
 dis = 0.9 # 미래가중치
 
@@ -88,7 +88,7 @@ def main():
         targetDQN = dqn.DQN(sess, sequence_length, data_dim, output_size, learning_rate, name="target")
         tf.global_variables_initializer().run()
 
-        last_episode = 0
+        last_episode = 1
 
         try:
             mainDQN.restore(last_episode)
@@ -128,7 +128,7 @@ def main():
 
                 finish = die or penalty
                 if finish:
-                    reward = -1000000.
+                    reward = -100000.
 
                 replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state, finish))
 
