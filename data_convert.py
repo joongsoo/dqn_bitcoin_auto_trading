@@ -2,7 +2,7 @@
 
 # 데이터 값 범위 정규화를 위한 보정 값 (0~1 사이의 수로 만들어주기 위함)
 data_reg = [100000.0, 10000.0, 10.0, # 가격 [BTC, ETH, XRP]
-            10.0, 100.0, 100000.0] # 거래량 [BTC, ETH, XRP]
+            1.0, 10.0, 10000.0] # 거래량 [BTC, ETH, XRP]
 
 def encode(li):
     for i in range(len(li)):
