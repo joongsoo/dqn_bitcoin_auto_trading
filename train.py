@@ -125,16 +125,15 @@ def main():
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty = env.step(action)
+                current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear = env.step(action)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
                 next_avg_buy_price = encode_avg_price(next_avg_buy_price)
 
-                finish = die or penalty
-                if finish:
-                    reward = -100000.
+                if die:
+                    reward = -100.
 
-                replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state, finish))
+                replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state, die))
 
                 if len(replay_buffer) > MAX_BUFFER_SIZE:
                     replay_buffer.popleft()
