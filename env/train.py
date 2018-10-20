@@ -2,6 +2,7 @@ import pymysql
 import random
 from data_convert import encode, decode, decode_with_idx
 import copy
+import math
 
 SQL_GET_DATA = """
 SELECT dt, avg(btc), avg(eth), avg(xrp), avg(btc_quantity), avg(eth_quantity), avg(xrp_quantity) FROM (
@@ -25,6 +26,7 @@ GROUP BY dt
 ORDER BY dt ASC
 """
 
+FEES = 0.9985
 
 IDX_XRP = 2
 
@@ -61,7 +63,7 @@ class Environment:
         self.money = start_money
         self.seq_size = seq_size
         self.coin_cnt = 0.
-        self.buy_list = []
+        self.buy_price = 0
 
     def get_random_actions(self):
         return random.randint(0, 2)
@@ -70,8 +72,8 @@ class Environment:
         self.money = self.start_money
         self.current_step = 0
         self.coin_cnt = 0
-        avg_buy_price = 0
-        return self.get_current_state(), self.money, self.coin_cnt, avg_buy_price
+        self.buy_price = 0
+        return self.get_current_state(), self.money, self.coin_cnt, self.buy_price
 
     def get_current_state(self):
         return self.data[self.current_step : self.current_step+self.seq_size]
@@ -92,33 +94,28 @@ class Environment:
         reward = 0
 
         if action == self.MODE_BUY:
-            available_money = round(self.money / 2)
-
             if self.money > now_price:
-                buy_cnt = round(available_money / now_price)
+                buy_cnt = math.floor(self.money / now_price * FEES)
                 self.money -= buy_cnt * now_price
-                buy_cnt = buy_cnt * 0.9985
                 self.coin_cnt += buy_cnt
 
                 # 구매 리스트에 추가
-                self.buy_list.append({'price': now_price, 'cnt': buy_cnt})
+                self.buy_price = now_price
             elif self.coin_cnt == 0:
                 die = True
         elif action == self.MODE_SELL:
             if self.coin_cnt != 0:
                 # 이득 계산
-                total_buy_price = 0.
-                for item in self.buy_list:
-                    total_buy_price += item['price'] * item['cnt']
+                total_buy_price = self.coin_cnt * self.buy_price
 
-                total_sell_price = self.coin_cnt * now_price * 0.9985
+                total_sell_price = self.coin_cnt * now_price * FEES
 
                 # 총 판매 금액에서 총 구매 금액을 빼면 얼마가 이득인지 나온다.
                 reward = total_sell_price - total_buy_price
 
                 self.money += total_sell_price
                 self.coin_cnt = 0
-                self.buy_list = []
+                self.buy_price = 0
 
         self.current_step += 1
 
@@ -133,19 +130,8 @@ class Environment:
         next_money = self.money
         next_coin_cnt = self.coin_cnt
 
-        total_buy_price = 0.
-        total_buy_cnt = 0
-        for item in self.buy_list:
-            total_buy_price += item['price'] * item['cnt']
-            total_buy_cnt += item['cnt']
-
-        if total_buy_price == 0 or total_buy_cnt == 0:
-            next_avg_buy_price = 0.
-        else:
-            next_avg_buy_price = total_buy_price / total_buy_cnt
-
         if self.coin_cnt == 0 and self.money < future_price:
             die = True
 
-        return self.current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty
+        return self.current_step, now_money, next_state, next_money, next_coin_cnt, self.buy_price, reward, die, clear, penalty
 
