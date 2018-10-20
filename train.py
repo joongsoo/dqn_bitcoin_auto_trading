@@ -56,11 +56,13 @@ def replay_train(mainDQN, targetDQN, train_batch, episode):
     Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1) * ~finish
 
     y = mainDQN.predict(states, moneys)
-    if episode > 1:
-        print(y)
+
+    # 액션 비율 로깅
+    predict_actions = np.argmax(y, axis=1)
+    unique, counts = np.unique(predict_actions, return_counts=True)
+    print(dict(zip(unique, counts)))
+
     y[np.arange(len(X)), actions] = Q_target
-    if episode > 1:
-        print(y)
 
     return mainDQN.update(X, moneys, y)
 
