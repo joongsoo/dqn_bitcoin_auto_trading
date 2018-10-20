@@ -47,7 +47,7 @@ class DQN:
 
             outputs, _states = tf.nn.dynamic_rnn(multi_cells, self._X, dtype=tf.float32)
 
-            rnn_output = fully_connected(outputs, self.data_dim, activation_fn=tf.nn.elu,
+            rnn_output = fully_connected(outputs, 1, activation_fn=tf.nn.elu,
                                                            weights_initializer=variance_scaling_initializer(dtype=tf.float32),
                                                             normalizer_fn=batch_norm,
                                                             normalizer_params=bn_params)
