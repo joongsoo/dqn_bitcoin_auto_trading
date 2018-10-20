@@ -43,17 +43,16 @@ def get_from_idx(idx, target_list):
 def is_learn_start():
     return len(replay_buffer) >= MAX_BUFFER_SIZE
 
-def replay_train(mainDQN, targetDQN, train_batch, episode):
+def replay_train(mainDQN, targetDQN, train_batch):
     states = np.vstack([[x[0]] for x in train_batch])
     moneys = np.vstack([x[1] for x in train_batch])
     next_moneys = np.vstack([x[2] for x in train_batch])
     actions = np.array([x[3] for x in train_batch])
     rewards = np.array([x[4] for x in train_batch])
     next_states = np.vstack([[x[5]] for x in train_batch])
-    finish = np.array([x[6] for x in train_batch])
     X = states
 
-    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1) * ~finish
+    Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1)
 
     y = mainDQN.predict(states, moneys)
 
@@ -130,13 +129,11 @@ def main():
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
                 next_avg_buy_price = encode_avg_price(next_avg_buy_price)
 
-                if die:
-                    reward = -100.
+                if not die:
+                    replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state))
 
-                replay_buffer.append((state, [before_money, before_coin_cnt, before_avg_price], [next_money, next_coin_cnt, next_avg_buy_price], action, reward, next_state, die))
-
-                if len(replay_buffer) > MAX_BUFFER_SIZE:
-                    replay_buffer.popleft()
+                    if len(replay_buffer) > MAX_BUFFER_SIZE:
+                        replay_buffer.popleft()
 
                 state = next_state
                 before_money = next_money
@@ -162,7 +159,7 @@ def main():
 
                 for idx in range(100):
                     minibatch = random.sample(replay_buffer, batch_size)
-                    loss, _ = replay_train(mainDQN, targetDQN, minibatch, episode)
+                    loss, _ = replay_train(mainDQN, targetDQN, minibatch)
 
                     if idx % TARGET_UPDATE_FREQUENCY == 0:
                         sess.run(copy_ops)
