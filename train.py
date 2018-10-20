@@ -56,11 +56,13 @@ def replay_train(mainDQN, targetDQN, train_batch, episode):
     Q_target = rewards + dis * np.max(targetDQN.predict(next_states, next_moneys), axis=1) * ~finish
 
     y = mainDQN.predict(states, moneys)
-    if episode > 1:
-        print(y)
+
+    # 액션 비율 로깅
+    predict_actions = np.argmax(y, axis=1)
+    unique, counts = np.unique(predict_actions, return_counts=True)
+    print(dict(zip(unique, counts)))
+
     y[np.arange(len(X)), actions] = Q_target
-    if episode > 1:
-        print(y)
 
     return mainDQN.update(X, moneys, y)
 
@@ -88,13 +90,15 @@ def main():
         targetDQN = dqn.DQN(sess, sequence_length, data_dim, output_size, learning_rate, name="target")
         tf.global_variables_initializer().run()
 
-        last_episode = 1
+        last_episode = 0
 
         try:
             mainDQN.restore(last_episode)
             targetDQN.restore(last_episode)
         except:
             print("save file not found")
+
+        last_episode += 1
 
         copy_ops = get_copy_var_ops()
         sess.run(copy_ops)
@@ -148,7 +152,10 @@ def main():
                 sms_str = "[home]\nepisode(step) : {}({})\n".format(episode, current_step) \
                           + "balance : {}".format(now_money)
 
-                send_sms(sms_str)
+                try:
+                    send_sms(sms_str)
+                except:
+                    pass
 
                 with open("save/train_queue.pkl", "wb") as f:
                     pickle.dump(replay_buffer, f)
