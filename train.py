@@ -124,7 +124,7 @@ def main():
 
                 # one step (1minute)
                 # TODO : 1minute -> 1hour
-                current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear, penalty = env.step(action)
+                current_step, now_money, next_state, next_money, next_coin_cnt, next_avg_buy_price, reward, die, clear = env.step(action)
                 next_money = encode_money(next_money)
                 next_coin_cnt = encode_coin_cnt(next_coin_cnt)
                 next_avg_buy_price = encode_avg_price(next_avg_buy_price)
